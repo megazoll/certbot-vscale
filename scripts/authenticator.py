@@ -6,7 +6,7 @@ import os
 import sys
 import tempfile
 import time
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 def main ():
   certbot_domain = os.getenv('CERTBOT_DOMAIN').strip()
@@ -46,18 +46,18 @@ def get_tld (domain):
   return '.'.join(domain.split('.')[-2:])
 
 def decode_idn (domain):
-  return domain.decode('idna')
+  return domain
 
 def get_record_domain (domain):
   return '_acme-challenge.{}'.format(domain)
 
 def get_domain_id (domain, token):
-  request = urllib2.Request('https://api.vscale.io/v1/domains/')
+  request = urllib.request.Request('https://api.vscale.io/v1/domains/')
   request.add_header('X-Token', token)
 
   try:
-    contents = urllib2.urlopen(request).read()
-  except urllib2.HTTPError as err:
+    contents = urllib.request.urlopen(request).read()
+  except urllib.error.HTTPError as err:
     log('failed to get domain ID: {} {}'.format(err.code, err.msg), level='error')
     exit(1)
 
@@ -78,13 +78,13 @@ def create_txt_record (domain_id, name, value, token):
 
   body = json.dumps(data, separators=(',', ':'))
 
-  request = urllib2.Request('https://api.vscale.io/v1/domains/{}/records/'.format(domain_id), data=body)
+  request = urllib.request.Request('https://api.vscale.io/v1/domains/{}/records/'.format(domain_id), data=body.encode('utf-8'))
   request.add_header('X-Token', token)
   request.add_header('Content-Type', 'application/json')
 
   try:
-    contents = urllib2.urlopen(request).read()
-  except urllib2.HTTPError as err:
+    contents = urllib.request.urlopen(request).read()
+  except urllib.error.HTTPError as err:
     log('failed to create TXT record: {} {}'.format(err.code, err.msg), level='error')
     exit(1)
 

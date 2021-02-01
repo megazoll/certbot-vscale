@@ -5,7 +5,7 @@ import json
 import os
 import sys
 import tempfile
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 def main ():
   certbot_domain = os.getenv('CERTBOT_DOMAIN').strip()
@@ -17,7 +17,7 @@ def main ():
   if not tmp_data:
     log('nothing to cleanup')
     exit(0)
-  
+
   domain_id = tmp_data['domain_id']
   record_id = tmp_data['record_id']
 
@@ -47,11 +47,11 @@ def delete_tmp_data (name):
   os.remove(filepath)
 
 def delete_record (domain_id, record_id, token):
-  request = urllib2.Request('https://api.vscale.io/v1/domains/{}/records/{}'.format(domain_id, record_id))
+  request = urllib.request.Request('https://api.vscale.io/v1/domains/{}/records/{}'.format(domain_id, record_id))
   request.add_header('X-Token', token)
   request.get_method = lambda: 'DELETE'
 
-  urllib2.urlopen(request)
+  urllib.request.urlopen(request)
 
 def log (msg, level='info'):
   ts = datetime.datetime.now().time()
